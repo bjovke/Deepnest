@@ -14,7 +14,7 @@
       ],
             "include_dirs" : [
  	 		"<!(node -e \"require('nan')\")",
-            "/Users/jackqiao/boost_1_62_0/"
+            "../boost/include/boost-1_72/"
 		]
         }
     ],

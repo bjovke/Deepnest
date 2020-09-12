@@ -97,7 +97,7 @@ using v8::Local;
 using v8::Array;
 using v8::Isolate;
 using v8::String;
-using v8::Handle;
+using v8::Local;
 using v8::Object;
 using v8::Value;
 
@@ -106,12 +106,13 @@ using namespace boost::polygon;
 NAN_METHOD(calculateNFP) {
   //std::stringstream buffer;
   //std::streambuf * old = std::cout.rdbuf(buffer.rdbuf());
-  
+  v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
+
   Isolate* isolate = info.GetIsolate();
 
-  Handle<Object> group = Handle<Object>::Cast(info[0]);
-  Handle<Array> A = Handle<Array>::Cast(group->Get(String::NewFromUtf8(isolate,"A")));
-  Handle<Array> B = Handle<Array>::Cast(group->Get(String::NewFromUtf8(isolate,"B")));
+  Local<Object> group = Local<Object>::Cast(info[0]);
+  Local<Array> A = Local<Array>::Cast(group->Get(String::NewFromUtf8(isolate,"A")));
+  Local<Array> B = Local<Array>::Cast(group->Get(String::NewFromUtf8(isolate,"B")));
   
   polygon_set a, b, c;
   std::vector<polygon> polys;
@@ -125,10 +126,10 @@ NAN_METHOD(calculateNFP) {
   double Aminy = 0;
   for (unsigned int i = 0; i < len; i++) {
   	Local<Object> obj = Local<Object>::Cast(A->Get(i));
-  	Amaxx = (std::max)(Amaxx, (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue());
-  	Aminx = (std::min)(Aminx, (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue());
-  	Amaxy = (std::max)(Amaxy, (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue());
-  	Aminy = (std::min)(Aminy, (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue());
+  	Amaxx = (std::max)(Amaxx, (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue(context).FromJust());
+  	Aminx = (std::min)(Aminx, (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue(context).FromJust());
+  	Amaxy = (std::max)(Amaxy, (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue(context).FromJust());
+  	Aminy = (std::min)(Aminy, (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue(context).FromJust());
   }
   
   len = B->Length();
@@ -138,10 +139,10 @@ NAN_METHOD(calculateNFP) {
   double Bminy = 0;
   for (unsigned int i = 0; i < len; i++) {
   	Local<Object> obj = Local<Object>::Cast(B->Get(i));
-  	Bmaxx = (std::max)(Bmaxx, (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue());
-  	Bminx = (std::min)(Bminx, (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue());
-  	Bmaxy = (std::max)(Bmaxy, (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue());
-  	Bminy = (std::min)(Bminy, (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue());
+  	Bmaxx = (std::max)(Bmaxx, (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue(context).FromJust());
+  	Bminx = (std::min)(Bminx, (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue(context).FromJust());
+  	Bmaxy = (std::max)(Bmaxy, (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue(context).FromJust());
+  	Bminy = (std::min)(Bminy, (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue(context).FromJust());
   }
   
   double Cmaxx = Amaxx + Bmaxx;
@@ -167,8 +168,8 @@ NAN_METHOD(calculateNFP) {
   
   for (unsigned int i = 0; i < len; i++) {
     Local<Object> obj = Local<Object>::Cast(A->Get(i));
-    int x = (int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue());
-    int y = (int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue());
+    int x = (int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue(context).FromJust());
+    int y = (int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue(context).FromJust());
         
     pts.push_back(point(x, y));
   }
@@ -178,17 +179,17 @@ NAN_METHOD(calculateNFP) {
   a+=poly;
   
   // subtract holes from a here...
-  Handle<Array> holes = Handle<Array>::Cast(A->Get(String::NewFromUtf8(isolate,"children")));
+  Local<Array> holes = Local<Array>::Cast(A->Get(String::NewFromUtf8(isolate,"children")));
   len = holes->Length();
   
   for(unsigned int i=0; i<len; i++){
-    Handle<Array> hole = Handle<Array>::Cast(holes->Get(i));
+    Local<Array> hole = Local<Array>::Cast(holes->Get(i));
     pts.clear();
     unsigned int hlen = hole->Length();
     for(unsigned int j=0; j<hlen; j++){
     	Local<Object> obj = Local<Object>::Cast(hole->Get(j));
-    	int x = (int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue());
-    	int y = (int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue());
+    	int x = (int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue(context).FromJust());
+    	int y = (int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue(context).FromJust());
     	pts.push_back(point(x, y));
     }
     boost::polygon::set_points(poly, pts.begin(), pts.end());
@@ -205,13 +206,13 @@ NAN_METHOD(calculateNFP) {
   
   for (unsigned int i = 0; i < len; i++) {
     Local<Object> obj = Local<Object>::Cast(B->Get(i));
-    int x = -(int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue());
-    int y = -(int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue());
+    int x = -(int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue(context).FromJust());
+    int y = -(int)(inputscale * (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue(context).FromJust());
     pts.push_back(point(x, y));
     
     if(i==0){
-    	xshift = (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue();
-    	yshift = (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue();
+    	xshift = (double)obj->Get(String::NewFromUtf8(isolate,"x"))->NumberValue(context).FromJust();
+    	yshift = (double)obj->Get(String::NewFromUtf8(isolate,"y"))->NumberValue(context).FromJust();
     }
   }
   
