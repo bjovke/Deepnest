@@ -10,7 +10,8 @@
     "clean": "node-gyp clean configure build --verbose --target=1.4.8 --arch=ia32 --dist-url=https://atom.io/download/atom-shell",
     "pack": "build --dir",
     "dist": "build",
-    "package": "electron-packager --overwrite ."
+    "package": "electron-packager --overwrite .",
+    "postinstall": "electron-builder install-app-deps"
   },
   "repository": "https://github.com/Jack000",
   "keywords": [
